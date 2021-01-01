@@ -3,6 +3,7 @@ const fs = require('fs')
 const path = require('path')
 const yargs = require('yargs/yargs');
 const Discord = require('discord.js');
+const emojis = require("emoji-name-map");
 
 const chunkString = require('./chunkString');
 const { match } = require('assert');
@@ -25,15 +26,16 @@ async function readAndWrite(outputChannel) {
   const usersById = userData.reduce((users, user) =>  { users[user.id] = user; return users}, {})
 
   let channelData = fs.readdirSync(path.join(inputDirectory, inputChannel))
-  const page = 37
+  // some options for debuggin certain pages, crude.
+  const page = 328
   const pageCount = 5
-  const offset = 5
-  const forcePageCount = 2
+  const offset = 2
+  const forcePageCount = 1
   channelData = channelData.slice(page * pageCount + offset, (page + 1) * pageCount + offset)
-
   if (forcePageCount) {
     channelData.length = forcePageCount
   }
+
 
   console.log(channelData)
 
@@ -109,13 +111,13 @@ async function readAndWrite(outputChannel) {
         }
       }
 
-      const discordMessage = `${time.toLocaleString()} - ${username}: ${text}`
+      const discordMessageText = `${time.toLocaleString()} - ${username}: ${text}`
       // discord has max text limit, chunk messages
       const maxLength = 2000
-      const chunkedMessages = chunkString(discordMessage, maxLength)
+      const chunkedMessages = chunkString(discordMessageText, maxLength)
+      let firstChunkedMessageDiscordResponse = null
       for ([index, chunkedMessage] of chunkedMessages.entries()) {
 
-        let discordMessage = null
         const messageContent = {
           content: chunkedMessage
         }
@@ -129,22 +131,23 @@ async function readAndWrite(outputChannel) {
           const parentReplyId = newDiscordMessagesBySlackTs[parentTs]
           messageContent.replyTo = parentReplyId
         }
-        discordMessage = await outputChannel.send(messageContent)
+        const discordMessage = await outputChannel.send(messageContent)
 
         // save first chunked message discord id in case we have a reply later
         if (index === 0) {
+          // also save resposne for adding reactions later
+          firstChunkedMessageDiscordResponse = discordMessage
           newDiscordMessagesBySlackTs[message.ts] = discordMessage.id
         }
       }
 
 
+      // check for any attachments that weren't previously linked. think this happens for old giphy embeds?
       if (message.attachments && message.attachments.length) {
-        // console.log(message.attachments)
         for (attachment of message.attachments) {
           let discordAttachment = null
+          // url in the message could be from_url or original_url, check that neither has been linked
           if (attachment.image_url && !matchedUrls.includes(attachment.from_url) && !matchedUrls.includes(attachment.original_url)) {
-            // console.log(attachment)
-
             discordAttachment = new Discord.MessageAttachment(attachment.image_url)
           }
           if (discordAttachment) {
@@ -152,6 +155,8 @@ async function readAndWrite(outputChannel) {
           }
         }
       }
+
+      // add any uploaded files, hopefully the private slack urls stay there and the token on them doesn't expire
       if (message.files && message.files.length) {
         for (file of message.files) {
           let discordAttachment = null
@@ -163,6 +168,14 @@ async function readAndWrite(outputChannel) {
           if (discordAttachment) {
             await outputChannel.send(discordAttachment)
           }
+        }
+      }
+
+      if (message.reactions) {
+        for(const reaction of message.reactions) {
+          const emoji = reaction.name
+          const e = emojis.get(`:${emoji}:`) || '❓'
+          await firstChunkedMessageDiscordResponse.react(e)
         }
       }
     }

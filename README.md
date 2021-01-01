@@ -1,9 +1,16 @@
 Import Slack History into Discord
 ==
 
-pretty rudimentary but it works. only does one channel at a time. Channels must exist already
+Copies slack exports into Discord.
+
+Attempts to:
+
+* Add reactions (only default emoji, custom emoji replaced with ?, only the bot reacts so things like voting through reactions broken)
+* Add attachments and file uploads
+* Convert Slack Threads to Discord replies
 
 Copy `.env-sample` to `.env` and add your Bot Token there. Bot must be logged in to your server already
+
 
 usage:
 
