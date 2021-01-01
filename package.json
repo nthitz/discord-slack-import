@@ -9,7 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "discord.js": "^12.5.1",
+    "discord.js": "github:discordjs/discord.js#master",
     "dotenv": "^8.2.0",
     "yargs": "^16.2.0"
   }
