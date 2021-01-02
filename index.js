@@ -15,7 +15,8 @@ const argv = yargs(process.argv.slice(2))
 .demandOption(['inputDirectory', 'inputChannel', 'outputChannel']).argv
 
 
-
+const GIPHY_BOT_ID = 'B1657RY23'
+const GIPHY_BOT_NAME = 'giphy'
 
 
 const { inputDirectory, inputChannel, outputChannel } = argv
@@ -109,6 +110,11 @@ async function readAndWrite(outputChannel) {
             console.log('unknown link', link)
           }
         }
+      }
+
+      // pull in newew Giphy bot images manually
+      if (message.bot_id === GIPHY_BOT_ID){
+        text = ` /giphy ${text} ${message.blocks[0].image_url}`
       }
 
       const discordMessageText = `${time.toLocaleString()} - ${username}: ${text}`
