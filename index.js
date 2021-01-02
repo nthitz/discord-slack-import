@@ -6,19 +6,12 @@ const Discord = require('discord.js');
 const EmojiConvertor = require('emoji-js');
 const chunkString = require('./chunkString');
 
+const { emojiAliases, customEmojiRewrites, emojiOverrides} = require('./emojis')
+
 const emojis = new EmojiConvertor();
-emojis.addAliases({
-  'yes': '1f44e',
-  'no': '1f44e',
-})
+emojis.addAliases(emojiAliases)
 emojis.allow_native = true
 emojis.replace_mode = 'unified'
-
-const customEmojiReplacement = {
-  'bear_trap': 'mouse_trap',
-  'trollface': 'japanese_goblin',
-  'excited_clap': 'clap',
-}
 
 
 
@@ -110,7 +103,7 @@ async function readAndWrite(outputChannel) {
             // sometimes urls are formatted like <https://example.com|Url Link Text>
             if (url.indexOf('|') !== -1) {
               const [link, title] = url.split('|')
-              if (link !== title) {
+              if (link.indexOf(title) === -1) {
                 textReplacement = `${link} \`${title}\``
               }
             }
@@ -140,6 +133,9 @@ async function readAndWrite(outputChannel) {
       const maxLength = 2000
       const chunkedMessages = chunkString(discordMessageText, maxLength)
       let firstChunkedMessageDiscordResponse = null
+      if (message.ts === '1584120601.058100') {
+        console.log(chunkedMessages)
+      }
       for ([index, chunkedMessage] of chunkedMessages.entries()) {
 
         const messageContent = {
@@ -155,8 +151,14 @@ async function readAndWrite(outputChannel) {
           const parentReplyId = newDiscordMessagesBySlackTs[parentTs]
           messageContent.replyTo = parentReplyId
         }
-        const discordMessage = await outputChannel.send(messageContent)
-
+        let discordMessage = null
+        try {
+          discordMessage = await outputChannel.send(messageContent)
+        } catch (error) {
+          console.log(error)
+          console.log(messageContent)
+          console.log(message)
+        }
         // save first chunked message discord id in case we have a reply later
         if (index === 0) {
           // also save resposne for adding reactions later
@@ -183,20 +185,22 @@ async function readAndWrite(outputChannel) {
       if (message.reactions) {
         for(const reaction of message.reactions) {
           let emoji = reaction.name
-          if (customEmojiReplacement[emoji]) {
-            emoji = customEmojiReplacement[emoji]
+          if (customEmojiRewrites[emoji]) {
+            emoji = customEmojiRewrites[emoji]
           }
           let e = emojis.replace_colons(`:${emoji}:`)
           if (!e) {
             console.log(emoji)
             e = '❓'
           }
+          if (emojiOverrides[emoji]) {
+            e = emojiOverrides[emoji]
+          }
           try {
             await firstChunkedMessageDiscordResponse.react(e)
           } catch (error) {
-            console.log(error)
+
             console.log(reaction)
-            console.log(e)
           }
         }
       }
