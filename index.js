@@ -3,10 +3,14 @@ const fs = require('fs')
 const path = require('path')
 const yargs = require('yargs/yargs');
 const Discord = require('discord.js');
-const emojis = require("emoji-name-map");
-
+const EmojiConvertor = require('emoji-js');
 const chunkString = require('./chunkString');
-const { match } = require('assert');
+
+const emojis = new EmojiConvertor();
+emojis.allow_native = true
+emojis.replace_mode = 'unified'
+
+
 
 const argv = yargs(process.argv.slice(2))
 .describe('inputDirectory', 'specify the path to the exported slack data')
@@ -30,7 +34,7 @@ async function readAndWrite(outputChannel) {
   // some options for debuggin certain pages, crude.
   const page = 328
   const pageCount = 5
-  const offset = 2
+  const offset = 3
   const forcePageCount = 1
   channelData = channelData.slice(page * pageCount + offset, (page + 1) * pageCount + offset)
   if (forcePageCount) {
@@ -96,7 +100,10 @@ async function readAndWrite(outputChannel) {
             let textReplacement = url
             // sometimes urls are formatted like <https://example.com|Url Link Text>
             if (url.indexOf('|')) {
-              textReplacement = url.split('|').join(' ')
+              const [link, title] = url.split('|')
+              if (link !== title) {
+                textReplacement = `${link} \`${title}\``
+              }
             }
             console.log(textReplacement)
             matchedUrls.push(url)
@@ -180,7 +187,11 @@ async function readAndWrite(outputChannel) {
       if (message.reactions) {
         for(const reaction of message.reactions) {
           const emoji = reaction.name
-          const e = emojis.get(`:${emoji}:`) || '❓'
+          let e = emojis.replace_colons(`:${emoji}:`)
+          if (!e) {
+            console.log(emoji)
+            e = '❓'
+          }
           await firstChunkedMessageDiscordResponse.react(e)
         }
       }
