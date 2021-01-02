@@ -5,7 +5,7 @@ Copies slack exports into Discord.
 
 Attempts to:
 
-* Add reactions (only default emoji, custom emoji replaced with ?, only the bot reacts so things like voting through reactions broken)
+* Add reactions (only default emoji, some custom emoji replaced with alternatives, others replaced with ?, only the bot reacts so things like voting through reactions broken)
 * Add attachments and file uploads
 * Convert Slack Threads to Discord replies
 

@@ -7,8 +7,18 @@ const EmojiConvertor = require('emoji-js');
 const chunkString = require('./chunkString');
 
 const emojis = new EmojiConvertor();
+emojis.addAliases({
+  'yes': '1f44e',
+  'no': '1f44e',
+})
 emojis.allow_native = true
 emojis.replace_mode = 'unified'
+
+const customEmojiReplacement = {
+  'bear_trap': 'mouse_trap',
+  'trollface': 'japanese_goblin',
+  'excited_clap': 'clap',
+}
 
 
 
@@ -172,13 +182,22 @@ async function readAndWrite(outputChannel) {
 
       if (message.reactions) {
         for(const reaction of message.reactions) {
-          const emoji = reaction.name
+          let emoji = reaction.name
+          if (customEmojiReplacement[emoji]) {
+            emoji = customEmojiReplacement[emoji]
+          }
           let e = emojis.replace_colons(`:${emoji}:`)
           if (!e) {
             console.log(emoji)
             e = '❓'
           }
-          await firstChunkedMessageDiscordResponse.react(e)
+          try {
+            await firstChunkedMessageDiscordResponse.react(e)
+          } catch (error) {
+            console.log(error)
+            console.log(reaction)
+            console.log(e)
+          }
         }
       }
     }
