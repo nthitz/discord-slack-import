@@ -153,6 +153,15 @@ async function readAndWrite(outputChannel) {
           messageContent.replyTo = parentReplyId
         }
         let discordMessage = null
+
+        // add any uploaded files, hopefully the private slack urls stay there and the token on them doesn't expire
+        if (message.files) {
+          messageContent.files = []
+          for (file of message.files) {
+            messageContent.files.push(new Discord.MessageAttachment(file.url_private, file.name))
+          }
+        }
+
         try {
           discordMessage = await outputChannel.send(messageContent)
         } catch (error) {
@@ -165,21 +174,6 @@ async function readAndWrite(outputChannel) {
           // also save resposne for adding reactions later
           firstChunkedMessageDiscordResponse = discordMessage
           newDiscordMessagesBySlackTs[message.ts] = discordMessage.id
-        }
-      }
-
-      // add any uploaded files, hopefully the private slack urls stay there and the token on them doesn't expire
-      if (message.files && message.files.length) {
-        for (file of message.files) {
-          let discordAttachment = null
-          if (file.url_private && 'name' in file) {
-            discordAttachment = new Discord.MessageAttachment(file.url_private, file.name)
-          } else {
-            console.log('unknown file', file)
-          }
-          if (discordAttachment) {
-            await outputChannel.send(discordAttachment)
-          }
         }
       }
 
