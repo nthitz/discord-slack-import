@@ -99,7 +99,7 @@ async function readAndWrite(outputChannel) {
             const url = link.substr(1, link.length - 2)
             let textReplacement = url
             // sometimes urls are formatted like <https://example.com|Url Link Text>
-            if (url.indexOf('|')) {
+            if (url.indexOf('|') !== -1) {
               const [link, title] = url.split('|')
               if (link !== title) {
                 textReplacement = `${link} \`${title}\``
