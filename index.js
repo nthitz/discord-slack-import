@@ -92,7 +92,6 @@ async function readAndWrite(outputChannel) {
 
       // reformat urls, both links and internal slack user ids. maybe others?
       const messageLinks = text.match(/(<[^>]+>)/gi)
-      const matchedUrls = []
       if (messageLinks) {
         for (link of messageLinks) {
           if (link.match(/^<https?:\/\//)) {
@@ -106,7 +105,6 @@ async function readAndWrite(outputChannel) {
               }
             }
             console.log(textReplacement)
-            matchedUrls.push(url)
             text = text.replace(link, textReplacement)
           } else if (link.match(/^<@U/)) {
             const user = link.substr(2, link.length - 3)
@@ -120,8 +118,11 @@ async function readAndWrite(outputChannel) {
       }
 
       // pull in newew Giphy bot images manually
-      if (message.bot_id === GIPHY_BOT_ID){
+      if (message.bot_id === GIPHY_BOT_ID && message.blocks){
         text = ` /giphy ${text} ${message.blocks[0].image_url}`
+      } else if (message.bot_id === GIPHY_BOT_ID && message.attachments ) {
+        text = ` /giphy ${message.attachments[0].title} ${message.attachments[0].image_url}`
+
       }
 
       const discordMessageText = `${time.toLocaleString()} - ${username}: ${text}`
@@ -151,21 +152,6 @@ async function readAndWrite(outputChannel) {
           // also save resposne for adding reactions later
           firstChunkedMessageDiscordResponse = discordMessage
           newDiscordMessagesBySlackTs[message.ts] = discordMessage.id
-        }
-      }
-
-
-      // check for any attachments that weren't previously linked. think this happens for old giphy embeds?
-      if (message.attachments && message.attachments.length) {
-        for (attachment of message.attachments) {
-          let discordAttachment = null
-          // url in the message could be from_url or original_url, check that neither has been linked
-          if (attachment.image_url && !matchedUrls.includes(attachment.from_url) && !matchedUrls.includes(attachment.original_url)) {
-            discordAttachment = new Discord.MessageAttachment(attachment.image_url)
-          }
-          if (discordAttachment) {
-            await outputChannel.send(discordAttachment)
-          }
         }
       }
 
