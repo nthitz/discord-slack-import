@@ -103,7 +103,8 @@ async function readAndWrite(outputChannel) {
             // sometimes urls are formatted like <https://example.com|Url Link Text>
             if (url.indexOf('|') !== -1) {
               const [link, title] = url.split('|')
-              if (link.indexOf(title) === -1) {
+              textReplacement = link
+              if (link.toLowerCase().indexOf(title.toLowerCase()) === -1) {
                 textReplacement = `${link} \`${title}\``
               }
             }
