@@ -129,7 +129,7 @@ async function readAndWrite(outputChannel) {
 
       }
 
-      const discordMessageText = `${time.toLocaleString()} - ${username}: ${text}`
+      const discordMessageText = `\`${time.toLocaleString()} - ${username}:\` ${text}`
       // discord has max text limit, chunk messages
       const maxLength = 2000
       const chunkedMessages = chunkString(discordMessageText, maxLength)
