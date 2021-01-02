@@ -31,11 +31,11 @@ async function readAndWrite(outputChannel) {
   const usersById = userData.reduce((users, user) =>  { users[user.id] = user; return users}, {})
 
   let channelData = fs.readdirSync(path.join(inputDirectory, inputChannel))
-  // some options for debuggin certain pages, crude.
-  const page = 328
-  const pageCount = 5
-  const offset = 3
-  const forcePageCount = 1
+  // some options for debugging certain pages, crude.
+  const page = 0
+  const pageCount = channelData.length // 5
+  const offset = 0
+  const forcePageCount = 0 // 1
   channelData = channelData.slice(page * pageCount + offset, (page + 1) * pageCount + offset)
   if (forcePageCount) {
     channelData.length = forcePageCount
