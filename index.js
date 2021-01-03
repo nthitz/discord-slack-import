@@ -23,8 +23,8 @@ const argv = yargs(process.argv.slice(2))
 
 
 const GIPHY_BOT_ID = 'B1657RY23'
-const GIPHY_BOT_NAME = 'giphy'
 
+const maxDiscordAttachmentSize = 1000 * 1000 * 8 // 8MB round down
 
 const { inputDirectory, inputChannel, outputChannel } = argv
 
@@ -131,8 +131,8 @@ async function readAndWrite(outputChannel) {
 
       const discordMessageText = `\`${time.toLocaleString()} - ${username}:\` ${text}`
       // discord has max text limit, chunk messages
-      const maxLength = 2000
-      const chunkedMessages = chunkString(discordMessageText, maxLength)
+      const maxDiscordMessageLength = 2000
+      const chunkedMessages = chunkString(discordMessageText, maxDiscordMessageLength)
       let firstChunkedMessageDiscordResponse = null
       if (message.ts === '1584120601.058100') {
         console.log(chunkedMessages)
@@ -154,12 +154,19 @@ async function readAndWrite(outputChannel) {
         }
         let discordMessage = null
 
+        const addAttachments = message.files && index === 0
         // add any uploaded files, hopefully the private slack urls stay there and the token on them doesn't expire
-        if (message.files) {
+        if (addAttachments) {
           messageContent.files = []
           for (file of message.files) {
-            messageContent.files.push(new Discord.MessageAttachment(file.url_private, file.name))
+            if (file.size < maxDiscordAttachmentSize) {
+              messageContent.files.push(new Discord.MessageAttachment(file.url_private, file.name))
+            } else {
+              messageContent.content += `${file.url_private} ${file.name}`
+            }
           }
+          // possible message truncation
+          messageContent.content.length = maxDiscordMessageLength
         }
 
         try {
