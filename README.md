@@ -8,6 +8,11 @@ Attempts to:
 * Add reactions (only default emoji, some custom emoji replaced with alternatives, others replaced with ?, only the bot reacts so things like voting through reactions broken)
 * Add attachments and file uploads
 * Convert Slack Threads to Discord replies
+* converts internal slack id text (like usernames or channel names) to readable form
+
+Caveats:
+* some stuff might not work properly?
+* doesn't reformat mailto: links
 
 Copy `.env-sample` to `.env` and add your Bot Token there. Bot must be logged in to your server already
 
@@ -27,5 +32,6 @@ example:
 `outputChannel` is where the messages are going to
 
 both channels must already exist
+
 
 

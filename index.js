@@ -64,9 +64,7 @@ async function readAndWrite(outputChannel) {
       let text = message.text
 
       // reformat quoted text
-      if (text.substr(0, 5) === '&gt; ') {
-        text = text.replace('&gt; ', '> ')
-      }
+      text = text.replace(/&gt;/g, '>')
 
       // set display name from available souorces
       let username = ''
