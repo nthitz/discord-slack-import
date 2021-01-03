@@ -115,6 +115,9 @@ async function readAndWrite(outputChannel) {
             console.log(user)
             const username = `@${usersById[user].profile.display_name}`
             text = text.replace(link, username)
+          } else if (link.match(/^<#C/)) {
+            const [channelId, channelName] = link.substr(1, link.length - 2).split('|')
+            text = text.replace(link, `#${channelName}`)
           } else {
             console.log('unknown link', link)
           }
