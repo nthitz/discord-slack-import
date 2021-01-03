@@ -65,6 +65,10 @@ async function readAndWrite(outputChannel) {
 
       // reformat quoted text
       text = text.replace(/&gt;/g, '>')
+      // if first part of message is a quote, add a newline to separate it from timestamp and username in chat message
+      if (text.indexOf('> ') === 0) {
+        text = `\n${text}`
+      }
 
       // set display name from available souorces
       let username = ''
