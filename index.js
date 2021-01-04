@@ -162,9 +162,10 @@ async function readAndWrite(outputChannel) {
         const addAttachments = message.files && index === 0
         // add any uploaded files, hopefully the private slack urls stay there and the token on them doesn't expire
         if (addAttachments) {
+          const combinedFileSize = message.files.reduce((size, file) => size += file.size, 0)
           messageContent.files = []
           for (file of message.files) {
-            if (file.size < maxDiscordAttachmentSize) {
+            if (combinedFileSize < maxDiscordAttachmentSize) {
               messageContent.files.push(new Discord.MessageAttachment(file.url_private, file.name))
             } else {
               messageContent.content += `${file.url_private} ${file.name}`
