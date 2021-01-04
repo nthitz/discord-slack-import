@@ -5,14 +5,16 @@ Copies slack exports into Discord.
 
 Attempts to:
 
-* Add reactions (only default emoji, some custom emoji replaced with alternatives, others replaced with ?, only the bot reacts so things like voting through reactions broken)
+* Add reactions (only default emoji, some custom emoji replaced with alternatives, others replaced with ?)
 * Add attachments and file uploads
 * Convert Slack Threads to Discord replies
-* converts internal slack id text (like usernames or channel names) to readable form
+* converts internal slack id text (e.g. user or channel names) to readable form
 
 Caveats:
 * some stuff might not work properly?
+* Reactions only react from one user, the bot. The hisitory of who and how many people reacted is lost.
 * doesn't reformat mailto: links
+* Discord replies work differently than Slack threads
 
 Copy `.env-sample` to `.env` and add your Bot Token there. Bot must be logged in to your server already
 
