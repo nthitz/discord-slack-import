@@ -61,6 +61,12 @@ async function readAndWrite(outputChannel) {
       // console.log(message)
       const time = new Date(+message.ts * 1000)
 
+      // file comments are weirdly formatted and require us to have references to the file message.
+      // we could post them as is, but then they wouldn't be a proper reply to the file.. meh just ignore
+      if (message.type === 'message' && message.subtype === 'file_comment') {
+        continue;
+      }
+
       let text = message.text
 
       // reformat quoted text
@@ -79,6 +85,8 @@ async function readAndWrite(outputChannel) {
       } else {
         console.log('skipping no user')
         console.log(message)
+        console.log(message.user)
+        console.log(usersById)
         return
       }
 
@@ -224,6 +232,7 @@ client.on('ready', () => {
   // console.log(client.channels)
   const output = client.channels.cache.find(c => c.name === outputChannel)
   if (!output) {
+    console.log('channel not found', outputChannel)
     return
   }
   // console.log(output)

@@ -13,8 +13,9 @@ Attempts to:
 Caveats:
 * some stuff might not work properly?
 * Reactions only react from one user, the bot. The hisitory of who and how many people reacted is lost.
-* doesn't reformat mailto: links
+* doesn't reformat mailto: or tel: links or !here tags
 * Discord replies work differently than Slack threads
+* ignores file comments
 
 Copy `.env-sample` to `.env` and add your Bot Token there. Bot must be logged in to your server already
 
