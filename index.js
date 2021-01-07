@@ -37,8 +37,9 @@ async function readAndWrite(outputChannel) {
   // some options for debugging certain pages, crude.
   const page = 0
   const pageCount = channelData.length // 5
-  const offset = 0
+  const offset = 0 //608
   const forcePageCount = 0 // 1
+  const minMessageTime = 0 //+'1518721520.000513'
   channelData = channelData.slice(page * pageCount + offset, (page + 1) * pageCount + offset)
   if (forcePageCount) {
     channelData.length = forcePageCount
@@ -59,11 +60,18 @@ async function readAndWrite(outputChannel) {
     console.log(date)
     for (message of input) {
       // console.log(message)
+      if (minMessageTime && +message.ts < minMessageTime) {
+        continue
+      }
       const time = new Date(+message.ts * 1000)
 
       // file comments are weirdly formatted and require us to have references to the file message.
       // we could post them as is, but then they wouldn't be a proper reply to the file.. meh just ignore
-      if (message.type === 'message' && message.subtype === 'file_comment') {
+      // also ignore empty bot messgaes
+      if (
+        (message.type === 'message' && message.subtype === 'file_comment') ||
+        (message.type === 'message' && message.subtype === 'bot_message' && message.text === '')
+      ) {
         continue;
       }
 
@@ -86,7 +94,6 @@ async function readAndWrite(outputChannel) {
         console.log('skipping no user')
         console.log(message)
         console.log(message.user)
-        console.log(usersById)
         return
       }
 
