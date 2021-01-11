@@ -94,7 +94,7 @@ async function readAndWrite(outputChannel) {
         console.log('skipping no user')
         console.log(message)
         console.log(message.user)
-        return
+        continue
       }
 
       // save threaded replies
